@@ -33,8 +33,7 @@ def analyze(
         .candidate
         .get(
             "resume_text",
-            ""
-        )
+        ) or ""
     )
 
 
@@ -43,8 +42,7 @@ def analyze(
         .job
         .get(
             "description",
-            ""
-        )
+        ) or ""
     )
 
     semantic_score = calculate_match(
