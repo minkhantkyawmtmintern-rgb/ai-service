@@ -1,31 +1,70 @@
-def compare_skills(candidate_skills, required_skills):
+def normalize_skill(skill: str) -> str:
 
-    candidate_skills = [
-        skill.lower().strip()
+    return (
+        skill
+        .lower()
+        .strip()
+    )
+
+
+def compare_skills(
+    candidate_skills,
+    required_skills
+):
+
+    candidate_set = {
+        normalize_skill(skill)
         for skill in candidate_skills
-    ]
+        if skill
+    }
 
-    required_skills = [
-        skill.lower().strip()
+    required_set = {
+        normalize_skill(skill)
         for skill in required_skills
-    ]
+        if skill
+    }
 
-    matched = []
-    missing = []
+    matched = sorted(
+        candidate_set
+        .intersection(required_set)
+    )
 
-    for skill in required_skills:
-        if skill in candidate_skills:
-            matched.append(skill)
-        else:
-            missing.append(skill)
+    missing = sorted(
+        required_set
+        - candidate_set
+    )
 
-    if len(required_skills) > 0:
-        skill_score = len(matched)/len(required_skills)*100
+    additional = sorted(
+        candidate_set
+        - required_set
+    )
+
+    if required_set:
+
+        skill_score = (
+            len(matched)
+            / len(required_set)
+        ) * 100
+
     else:
+
         skill_score = 0
 
     return {
-        "matched_skills":matched,
-        "missing_skills":missing,
-        "skill_score": round(skill_score,2)
+
+        "matched_skills":
+            matched,
+
+        "missing_skills":
+            missing,
+
+        "additional_skills":
+            additional,
+
+        "skill_score":
+            round(
+                skill_score,
+                2
+            )
+
     }
