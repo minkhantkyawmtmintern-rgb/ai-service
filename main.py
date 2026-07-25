@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from services.matcher import calculate_match
 from services.feedback import generate_feedback
 from services.skill_matcher import compare_skills
+from services.resume_parser import extract_resume_information
 
 app = FastAPI(title="AI Recruitment Service")
 
@@ -13,6 +14,10 @@ class AnalyzeRequest(BaseModel):
 
     candidate: dict
 
+class ResumeRequest(BaseModel):
+
+    resume_text: str
+
 @app.get("/")
 def home():
 
@@ -21,6 +26,14 @@ def home():
         "AI Recruitment Service Running"
     }
 
+@app.post("/resume-analysis")
+def resume_analysis(data: ResumeRequest):
+
+    result = extract_resume_information(
+        data.resume_text
+    )
+
+    return result
 
 @app.post("/analyze")
 def analyze( data: AnalyzeRequest):
@@ -47,7 +60,9 @@ def analyze( data: AnalyzeRequest):
         skill_result["matched_skills"],
         skill_result["missing_skills"]
     )
-
+    print("Semantic Score :", semantic_score)
+    print("Skill Score :", skill_result["skill_score"])
+    print("Final Score :", final_score)
     return {
 
         "score": round(final_score, 2),
@@ -81,5 +96,5 @@ def analyze( data: AnalyzeRequest):
             "missing_skills": skill_result["missing_skills"]
 
         }
-
+    
     }
