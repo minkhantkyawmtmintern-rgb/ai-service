@@ -81,6 +81,7 @@ TECHNOLOGY_PATTERNS = [
     r"\bAPI Development\b",
     r"\bUnit Testing\b",
     r"\bSoftware Testing\b",
+    r"\bGit\b",
     r"\bGitHub\b",
     r"\bGitLab\b",
     r"\bCI/CD\b",
@@ -231,36 +232,33 @@ def extract_section(
     return "\n".join(collected).strip()
 
 
-def extract_skills(text: str) -> list[str]:
+def extract_skills(text: str):
 
     skills = []
 
-    # First try to extract the dedicated skills section.
-    skills_section = extract_section(
-        text,
-        SECTION_HEADINGS["skills"]
-    )
-
-    source_text = skills_section or text
-
-    # Detect known technical phrases.
+    # Search the ENTIRE resume
     for pattern in TECHNOLOGY_PATTERNS:
 
         matches = re.findall(
             pattern,
-            source_text,
+            text,
             re.IGNORECASE
         )
 
         for match in matches:
             skills.append(match)
 
-    # Also support common comma / pipe / bullet separated
-    # skill lists.
+    # If a dedicated Skills section exists,
+    # also parse comma/bullet separated items.
+    skills_section = extract_section(
+        text,
+        SECTION_HEADINGS["skills"]
+    )
+
     if skills_section:
 
         parts = re.split(
-            r"[,|•;]",
+            r"[,|•;\n]",
             skills_section
         )
 
@@ -270,10 +268,7 @@ def extract_skills(text: str) -> list[str]:
 
             if 1 < len(part) <= 60:
 
-                # Ignore obvious sentence fragments.
-                if len(part.split()) <= 6:
-
-                    skills.append(part)
+                skills.append(part)
 
     return unique_preserve_order(skills)
 
